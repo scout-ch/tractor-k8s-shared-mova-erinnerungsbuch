@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend
+  namespace: mova-erinnerungsbuch
+data:
+  API_ENDPOINT: https://mova-erinnerungsbuch.ch
+  LOG_LEVEL: "40"
+  NODE_PORT: "5173"
+  REDIS_DATABASE: "3"
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_TTL: "60"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: mova-erinnerungsbuch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: frontend
+          image: ghcr.io/scout-ch/mova-erinnerungsbuch-frontend:latest@sha256:064b75b8c54b1221f45f1518b4c72509552b9729ac33702621ddf6250a9ef0b6
+          name: frontend
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: mova-erinnerungsbuch
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 5173
+      targetPort: 5173
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  namespace: mova-erinnerungsbuch
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  rules:
+    - host: www.mova-erinnerungsbuch.ch
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 5173
+    - host: mova-erinnerungsbuch.ch
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 5173

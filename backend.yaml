@@ -1,0 +1,289 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend
+  namespace: mova-erinnerungsbuch
+data:
+  CRAFT_ADD_TRAILING_SLASHES_TO_URLS: "1"
+  CRAFT_ALLOW_ADMIN_CHANGES: "false"
+  CRAFT_APP_ID: CraftCMS--5e04a385-8166-4cae-8b10-6b6a830891cc
+  CRAFT_BACKUP_ON_UPDATE: "false"
+  CRAFT_CONVERT_FILENAMES_TO_ASCII: "true"
+  CRAFT_CP_TRIGGER: admin
+  CRAFT_DB_DATABASE: mova-erinnerungsbuch
+  CRAFT_DB_DRIVER: mysql
+  CRAFT_DB_SCHEMA: ""
+  CRAFT_DB_SERVER: mariadb.tractor.scout.ch
+  CRAFT_DB_PORT: "3306"
+  CRAFT_DB_TABLE_PREFIX: ""
+  CRAFT_DB_USER: mova-erinnerungsbuch
+  CRAFT_DEFAULT_WEEK_START_DAY: "1"
+  CRAFT_DEV_MODE: "0"
+  CRAFT_DISALLOW_ROBOTS: "0"
+  CRAFT_ENVIRONMENT: production
+  CRAFT_HEADLESS_MODE: "1"
+  CRAFT_IMAGE_DRIVER: gd
+  CRAFT_LIMIT_AUTO_SLUGS_TO_ASCII: "1"
+  CRAFT_MAX_CACHED_CLOUD_IMAGE_SIZE: "3840"
+  CRAFT_MAX_REVISIONS: "5"
+  CRAFT_MAX_UPLOAD_FILE_SIZE: "268435456"
+  CRAFT_OMIT_SCRIPT_NAME_IN_URLS: "1"
+  CRAFT_PREVENT_USER_ENUMERATION: "1"
+  CRAFT_RUN_QUEUE_AUTOMATICALLY: "false"
+  CRAFT_SAME_SITE_COOKIE_VALUE: Lax
+  CRAFT_SEND_CONTENT_LENGTH_HEADER: "1"
+  CRAFT_SEND_POWERED_BY_HEADER: "false"
+  CRAFT_STORE_USER_IPS: "1"
+  CRAFT_STREAM_LOG: "true"
+  CRAFT_TIMEZONE: Europe/Zurich
+  CRAFT_TRANSFORM_GIFS: "false"
+  CRAFT_TRANSFORM_SVGS: "false"
+  CRAFT_UPSCALE_IMAGES: "false"
+  CRAFT_WEB_ROOT: /app/web
+  DO_BUCKET: mova-erinnerungsbuch
+  DO_PUBLIC_URL: https://s3.pub2.infomaniak.cloud/object/v1/AUTH_d0349cfddf9046e99b6f3a5d7d48af62/mova-erinnerungsbuch
+  DO_ENDPOINT: https://s3.pub2.infomaniak.cloud
+  DO_REGION: us-east-1
+  DO_SUBFOLDER: data
+  DO_SUBFOLDER_POSTER: data-poster
+  DO_SUBFOLDER_REMOTE_SYNC: remote-sync
+  FROM_EMAIL: noreply@mova-erinnerungsbuch.ch
+  FROM_NAME: "Mova Erinnerungsbuch"
+  REPLY_TO_EMAIL: noreply@mova-erinnerungsbuch.ch
+  SMTP_HOST: smtp.mailomat.cloud
+  PHP_MAX_EXECUTION_TIME: "300"
+  PHP_MEMORY_LIMIT: 1024M
+  PHP_POST_MAX_SIZE: 256M
+  PHP_UPLOAD_MAX_FILESIZE: 64M
+  REDIS_HOSTNAME: redis
+  SMTP_AUTH: "1"
+  SMTP_PORT: "587"
+  SMTP_USER: noreply@mova-erinnerungsbuch.ch
+  VUE: https://mova-erinnerungsbuch.ch
+  WEB: https://mova-erinnerungsbuch.ch
+  WEBROOT: /app/web
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: craft-license
+  namespace: mova-erinnerungsbuch
+type: Opaque
+#stringData:
+#  license.key: |
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend
+  namespace: mova-erinnerungsbuch
+type: Opaque
+#stringData:
+#  CRAFT_SECURITY_KEY:
+#  DO_ACCESS_KEY_ID:
+#  DO_SECRET_ACCESS_KEY:
+#  SMTP_PASSWORD:
+#  CRAFT_DB_PASSWORD:
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: craft-storage
+  namespace: mova-erinnerungsbuch
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: csi-cinder-sc-delete
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: mova-erinnerungsbuch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+      securityContext:
+        fsGroup: 3000
+      initContainers:
+        - name: permission-fixer
+          image: ubuntu
+          volumeMounts:
+            - mountPath: /app/storage
+              name: craft-storage
+          command: ["/bin/chown", "-R", "-v", "3000:3000", "/app/storage"]
+      containers:
+        - name: backend
+          envFrom:
+            - configMapRef:
+                name: backend
+            - secretRef:
+                name: backend
+          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:a489840ee342841cd1136d020c9f8ed668c4ae17f362177822f01da0c4084f7a
+          volumeMounts:
+            - mountPath: /app/config/license.key
+              name: craft-license
+              readOnly: true
+              subPath: license.key
+            - mountPath: /app/storage
+              name: craft-storage
+      restartPolicy: Always
+      volumes:
+        - name: craft-license
+          readOnly: true
+          secret:
+            items:
+              - key: license.key
+                path: license.key
+            secretName: craft-license
+        - name: craft-storage
+          persistentVolumeClaim:
+            claimName: craft-storage
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: mova-erinnerungsbuch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+      securityContext:
+        fsGroup: 3000
+      containers:
+        - name: backend
+          command: ["php", "craft", "queue/listen", "--verbose"]
+          envFrom:
+            - configMapRef:
+                name: backend
+            - secretRef:
+                name: backend
+          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:a489840ee342841cd1136d020c9f8ed668c4ae17f362177822f01da0c4084f7a
+          volumeMounts:
+            - mountPath: /app/config/license.key
+              name: craft-license
+              readOnly: true
+              subPath: license.key
+            - mountPath: /app/storage
+              name: craft-storage
+      restartPolicy: Always
+      volumes:
+        - name: craft-license
+          readOnly: true
+          secret:
+            items:
+              - key: license.key
+                path: license.key
+            secretName: craft-license
+        - name: craft-storage
+          persistentVolumeClaim:
+            claimName: craft-storage
+      affinity:
+        podAffinity: # We need to schedule this on the same node as taiga-back because of shared volumes
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - backend
+              topologyKey: "kubernetes.io/hostname"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: mova-erinnerungsbuch
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend
+  namespace: mova-erinnerungsbuch
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  rules:
+    - host: mova-erinnerungsbuch.ch
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/admin"
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080
+          - pathType: Prefix
+            path: "/api"
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080
+          - pathType: Prefix
+            path: "/graphql"
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080
+          - pathType: Prefix
+            path: "/cpresources"
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080
+          - pathType: Prefix
+            path: "/actions"
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080
+          - pathType: Prefix
+            path: "/sitemap.xml"
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080
+          - pathType: Prefix
+            path: "/robots.txt"
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080
