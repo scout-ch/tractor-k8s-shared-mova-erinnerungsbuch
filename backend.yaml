@@ -144,7 +144,6 @@ spec:
       restartPolicy: Always
       volumes:
         - name: craft-license
-          readOnly: true
           secret:
             items:
               - key: license.key
@@ -194,7 +193,6 @@ spec:
       restartPolicy: Always
       volumes:
         - name: craft-license
-          readOnly: true
           secret:
             items:
               - key: license.key
