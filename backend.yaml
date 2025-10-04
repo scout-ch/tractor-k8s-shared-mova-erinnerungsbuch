@@ -138,6 +138,7 @@ spec:
             - mountPath: /app/config/license.key
               name: craft-license
               readOnly: true
+              recursiveReadOnly: Enabled
               subPath: license.key
             - mountPath: /app/storage
               name: craft-storage
@@ -187,6 +188,7 @@ spec:
             - mountPath: /app/config/license.key
               name: craft-license
               readOnly: true
+              recursiveReadOnly: Enabled
               subPath: license.key
             - mountPath: /app/storage
               name: craft-storage
