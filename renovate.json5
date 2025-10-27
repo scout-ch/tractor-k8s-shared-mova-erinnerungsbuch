@@ -39,7 +39,7 @@
   ],
   "kubernetes": {
     "managerFilePatterns": [
-      ".+\\.yaml$/"
+      "/\\.yaml$/"
     ]
   }
 }
