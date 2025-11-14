@@ -121,7 +121,7 @@ spec:
         fsGroup: 3000
       initContainers:
         - name: permission-fixer
-          image: ubuntu@sha256:66460d557b25769b102175144d538d88219c077c678a49af4afca6fbfc1b5252
+          image: ubuntu@sha256:4a5ffc07dd015f03d6cb56f209db27ed2378056f7cc8a70ae11d0c35718ed3e6
           volumeMounts:
             - mountPath: /app/storage
               name: craft-storage
