@@ -62,22 +62,22 @@ data:
   VUE: https://mova-erinnerungsbuch.ch
   WEB: https://mova-erinnerungsbuch.ch
   WEBROOT: /app/web
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: craft-license
-  namespace: mova-erinnerungsbuch
-type: Opaque
+#---
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  name: craft-license
+#  namespace: mova-erinnerungsbuch
+#type: Opaque
 #stringData:
 #  license.key: |
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: backend
-  namespace: mova-erinnerungsbuch
-type: Opaque
+#---
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  name: backend
+#  namespace: mova-erinnerungsbuch
+#type: Opaque
 #stringData:
 #  CRAFT_SECURITY_KEY:
 #  DO_ACCESS_KEY_ID:
