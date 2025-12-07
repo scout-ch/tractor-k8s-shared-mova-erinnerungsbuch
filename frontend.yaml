@@ -27,6 +27,8 @@ spec:
       labels:
         app: frontend
     spec:
+      nodeSelector:
+        kaas.infomaniak.cloud/instance-pool: pck-8kxhclv-pdp
       containers:
         - envFrom:
             - configMapRef:
