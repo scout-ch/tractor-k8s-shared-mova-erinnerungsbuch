@@ -115,8 +115,6 @@ spec:
       labels:
         app: backend
     spec:
-      imagePullSecrets:
-        - name: ghcr
       securityContext:
         fsGroup: 3000
       initContainers:
@@ -133,7 +131,7 @@ spec:
                 name: backend
             - secretRef:
                 name: backend
-          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:766e1e0f917348344faa29a314e361dde8b0eeab5ee65c82f144103579edf3e6
+          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:abb726a4a8cec9f2a667285294a43748616b39db032a2d84202c3eaa99275d65
           volumeMounts:
             - mountPath: /app/config/license.key
               name: craft-license
@@ -171,8 +169,6 @@ spec:
       labels:
         app: worker
     spec:
-      imagePullSecrets:
-        - name: ghcr
       securityContext:
         fsGroup: 3000
       containers:
@@ -183,7 +179,7 @@ spec:
                 name: backend
             - secretRef:
                 name: backend
-          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:766e1e0f917348344faa29a314e361dde8b0eeab5ee65c82f144103579edf3e6
+          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:abb726a4a8cec9f2a667285294a43748616b39db032a2d84202c3eaa99275d65
           volumeMounts:
             - mountPath: /app/config/license.key
               name: craft-license

@@ -27,8 +27,6 @@ spec:
       labels:
         app: frontend
     spec:
-      imagePullSecrets:
-        - name: ghcr
       containers:
         - envFrom:
             - configMapRef:
