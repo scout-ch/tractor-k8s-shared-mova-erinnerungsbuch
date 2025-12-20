@@ -56,6 +56,7 @@ metadata:
   namespace: mova-erinnerungsbuch
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: letsencrypt
 spec:
   rules:
     - host: www.mova-erinnerungsbuch.ch
@@ -78,3 +79,8 @@ spec:
                 name: frontend
                 port:
                   number: 5173
+  tls:
+    - hosts:
+        - www.mova-erinnerungsbuch.ch
+        - mova-erinnerungsbuch.ch
+      secretName: tls-cert
