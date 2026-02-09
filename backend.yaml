@@ -133,7 +133,7 @@ spec:
                 name: backend
             - secretRef:
                 name: backend
-          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:6737c2039b1119275fe80774f54ae38406d0b81946cccd96acbf48435e73d54d
+          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:fda3de9d649783bd95fc904d0163bbd9b4150ca72ae9a0d77af975de94709fc9
           volumeMounts:
             - mountPath: /app/config/license.key
               name: craft-license
@@ -183,7 +183,7 @@ spec:
                 name: backend
             - secretRef:
                 name: backend
-          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:6737c2039b1119275fe80774f54ae38406d0b81946cccd96acbf48435e73d54d
+          image: ghcr.io/scout-ch/mova-erinnerungsbuch-backend:latest@sha256:fda3de9d649783bd95fc904d0163bbd9b4150ca72ae9a0d77af975de94709fc9
           volumeMounts:
             - mountPath: /app/config/license.key
               name: craft-license
