@@ -49,38 +49,22 @@ spec:
     - port: 5173
       targetPort: 5173
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
   name: frontend
   namespace: mova-erinnerungsbuch
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: letsencrypt
 spec:
+  parentRefs:
+    - name: mova-erinnerungsbuch
+      sectionName: https-www
+      kind: Gateway
   rules:
-    - host: www.mova-erinnerungsbuch.ch
-      http:
-        paths:
-          - pathType: Prefix
-            path: "/"
-            backend:
-              service:
-                name: frontend
-                port:
-                  number: 5173
-    - host: mova-erinnerungsbuch.ch
-      http:
-        paths:
-          - pathType: Prefix
-            path: "/"
-            backend:
-              service:
-                name: frontend
-                port:
-                  number: 5173
-  tls:
-    - hosts:
-        - www.mova-erinnerungsbuch.ch
-        - mova-erinnerungsbuch.ch
-      secretName: tls-cert
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+      backendRefs:
+        - name: frontend
+          port: 5173

@@ -226,70 +226,40 @@ spec:
     - port: 8080
       targetPort: 8080
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
   name: backend
   namespace: mova-erinnerungsbuch
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: letsencrypt
 spec:
+  parentRefs:
+    - name: mova-erinnerungsbuch
+      sectionName: https-www
+      kind: Gateway
   rules:
-    - host: mova-erinnerungsbuch.ch
-      http:
-        paths:
-          - pathType: Prefix
-            path: "/admin"
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 8080
-          - pathType: Prefix
-            path: "/api"
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 8080
-          - pathType: Prefix
-            path: "/graphql"
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 8080
-          - pathType: Prefix
-            path: "/cpresources"
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 8080
-          - pathType: Prefix
-            path: "/actions"
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 8080
-          - pathType: Prefix
-            path: "/sitemap.xml"
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 8080
-          - pathType: Prefix
-            path: "/robots.txt"
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 8080
-  tls:
-    - hosts:
-        - www.mova-erinnerungsbuch.ch
-        - mova-erinnerungsbuch.ch
-      secretName: tls-cert
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /admin
+        - path:
+            type: PathPrefix
+            value: /api
+        - path:
+            type: PathPrefix
+            value: /graphql
+        - path:
+            type: PathPrefix
+            value: /cpresources
+        - path:
+            type: PathPrefix
+            value: /actions
+        - path:
+            type: PathPrefix
+            value: /sitemap.xml
+        - path:
+            type: PathPrefix
+            value: /robots.txt
+
+      backendRefs:
+        - name: backend
+          port: 8080

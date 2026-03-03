@@ -1,0 +1,53 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: mova-erinnerungsbuch
+  namespace: mova-erinnerungsbuch
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  gatewayClassName: traefik
+  # Only Routes from the same namespace are allowed.
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 8443 # Default traefik helm chart port, will be mapped to 443
+      hostname: mova-erinnerungsbuch.ch
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: secret-tls
+            namespace: mova-erinnerungsbuch
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https-www
+      protocol: HTTPS
+      port: 8443 # Default traefik helm chart port, will be mapped to 443
+      hostname: www.mova-erinnerungsbuch.ch
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: secret-tls
+            namespace: mova-erinnerungsbuch
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: www-redirect
+  namespace: mova-erinnerungsbuch
+spec:
+  parentRefs:
+    - name: mova-erinnerungsbuch
+      sectionName: https
+      kind: Gateway
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            hostname: www.mova-erinnerungsbuch.ch
+            statusCode: 302
