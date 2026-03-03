@@ -234,7 +234,7 @@ metadata:
 spec:
   parentRefs:
     - name: mova-erinnerungsbuch
-      sectionName: https-www
+      sectionName: https
       kind: Gateway
   rules:
     - matches:
