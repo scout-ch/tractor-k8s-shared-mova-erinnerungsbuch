@@ -28,7 +28,7 @@ spec:
         app: frontend
     spec:
       nodeSelector:
-        kaas.infomaniak.cloud/instance-pool: pck-2tvwejg-ppy
+        kaas.infomaniak.cloud/instance-pool: pck-2tvwejg-pne
       containers:
         - envFrom:
             - configMapRef:

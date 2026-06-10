@@ -14,7 +14,7 @@ spec:
         app: redis
     spec:
       nodeSelector:
-        kaas.infomaniak.cloud/instance-pool: pck-2tvwejg-ppy
+        kaas.infomaniak.cloud/instance-pool: pck-2tvwejg-pne
       containers:
         - image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
           name: redis

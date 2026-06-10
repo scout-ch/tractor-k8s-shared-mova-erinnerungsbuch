@@ -116,7 +116,7 @@ spec:
         app: backend
     spec:
       nodeSelector:
-        kaas.infomaniak.cloud/instance-pool: pck-2tvwejg-ppy
+        kaas.infomaniak.cloud/instance-pool: pck-2tvwejg-pne
       securityContext:
         fsGroup: 3000
       initContainers:
@@ -172,7 +172,7 @@ spec:
         app: worker
     spec:
       nodeSelector:
-        kaas.infomaniak.cloud/instance-pool: pck-2tvwejg-ppy
+        kaas.infomaniak.cloud/instance-pool: pck-2tvwejg-pne
       securityContext:
         fsGroup: 3000
       containers:
