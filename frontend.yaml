@@ -33,7 +33,7 @@ spec:
         - envFrom:
             - configMapRef:
                 name: frontend
-          image: ghcr.io/scout-ch/mova-erinnerungsbuch-frontend:latest@sha256:f4a93c54ea95870174a0f3d8a51da001372812c4c0e95ac9b284d9ca0c2942a6
+          image: ghcr.io/scout-ch/mova-erinnerungsbuch-frontend:latest@sha256:230079d9123b263b547e7bb26aa7a3bb4f60b3b99daa86ecf71631fff489ca3c
           name: frontend
       restartPolicy: Always
 ---
